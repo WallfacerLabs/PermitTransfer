@@ -1,14 +1,12 @@
 {
   "name": "permit-transfer",
   "version": "1.0.0",
-  "private": true,
   "license": "MIT",
   "author": "WallfacerLabs",
   "scripts": {
     "install": "forge install || git submodule update --init --recursive",
     "build": "forge build",
-    "test": "forge test --no-match-contract ForkTest",
-    "test:fork": "forge test --match-contract ForkTest",
+    "test": "forge test",
     "lint:sol": "solhint '{contracts,test}/**/*.sol'",
     "lint:fmt": "forge fmt --check",
     "lint:fix": "forge fmt",
