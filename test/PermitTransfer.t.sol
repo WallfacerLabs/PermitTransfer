@@ -21,8 +21,8 @@ contract PermitTransferTest is Test {
     function setUp() public {
         permitTransfer = new PermitTransfer();
         token = new MockERC20Permit("TestToken");
-        token.mint(user, 100 ether);
-        token.mint(user2, 100 ether);
+        token.mint(user, userBalance);
+        token.mint(user2, user2Balance);
     }
 
     function test_PermittedTransfer() public {
