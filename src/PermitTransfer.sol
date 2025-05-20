@@ -3,10 +3,13 @@ pragma solidity ^0.8.30;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 interface IToken is IERC20, IERC20Permit {}
 
 contract PermitTransfer {
+    using ECDSA for bytes32;
+
     struct PermitData {
         address owner;
         uint256 value;
@@ -31,7 +34,6 @@ contract PermitTransfer {
             "PermitTransfer: recipient/owner cannot be zero address"
         );
 
-        (bytes32 r, bytes32 s, uint8 v) = decodeSignature(transferSignature);
         bytes32 transferHash = keccak256(
             abi.encode(
                 keccak256("Transfer(address token,address to,uint256 amount,uint256 nonce)"),
@@ -41,11 +43,11 @@ contract PermitTransfer {
                 transferData.token.nonces(permitData.owner)
             )
         );
-        address signer = ecrecover(transferHash, v, r, s);
+        address signer = transferHash.recover(transferSignature);
         require(signer == permitData.owner, "PermitTransfer: invalid transfer signature");
         require(permitData.value >= transferData.amount, "PermitTransfer: insufficient permit value");
 
-        (r, s, v) = decodeSignature(permitSignature);
+        (bytes32 r, bytes32 s, uint8 v) = decodeSignature(permitSignature);
 
         transferData.token.permit(permitData.owner, address(this), permitData.value, permitData.deadline, v, r, s);
         transferData.token.transferFrom(permitData.owner, transferData.to, transferData.amount);
