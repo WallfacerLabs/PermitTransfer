@@ -115,7 +115,6 @@ contract PermitTransferTest is Test {
         permitTransfer.permittedTransferFrom(
             permitData, transferData, permitSignature, transferSignature, transferAmount
         );
-        permitTransfer.DOMAIN_SEPARATOR();
     }
 
     function test_RevertsOnInsufficientPermitValue() public {
