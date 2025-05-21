@@ -55,7 +55,7 @@ contract PermitTransfer {
 
     function decodeSignature(bytes memory signature) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
         require(signature.length == 65, "PermitTransfer: invalid signature length");
-        assembly {
+        assembly ("memory-safe") {
             r := mload(add(signature, 0x20))
             s := mload(add(signature, 0x40))
             v := byte(0, mload(add(signature, 0x60)))
