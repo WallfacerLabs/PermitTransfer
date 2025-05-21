@@ -4,10 +4,11 @@ pragma solidity ^0.8.30;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 interface IToken is IERC20, IERC20Permit {}
 
-contract PermitTransfer {
+contract PermitTransfer is EIP712 {
     using ECDSA for bytes32;
 
     struct PermitData {
@@ -19,6 +20,12 @@ contract PermitTransfer {
     struct TransferData {
         IToken token;
         address to;
+    }
+
+    constructor() EIP712("PermitTransfer", "1") {}
+
+    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        return _domainSeparatorV4();
     }
 
     function permittedTransferFrom(
@@ -35,11 +42,17 @@ contract PermitTransfer {
         );
 
         bytes32 transferHash = keccak256(
-            abi.encode(
-                keccak256("Transfer(address token,address to,uint256 nonce)"),
-                transferData.token,
-                transferData.to,
-                transferData.token.nonces(permitData.owner)
+            abi.encodePacked(
+                hex"1901",
+                DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        keccak256("Transfer(address token,address to,uint256 nonce)"),
+                        transferData.token,
+                        transferData.to,
+                        transferData.token.nonces(permitData.owner)
+                    )
+                )
             )
         );
         address signer = transferHash.recover(transferSignature);

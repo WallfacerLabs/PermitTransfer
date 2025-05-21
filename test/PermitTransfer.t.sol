@@ -115,6 +115,7 @@ contract PermitTransferTest is Test {
         permitTransfer.permittedTransferFrom(
             permitData, transferData, permitSignature, transferSignature, transferAmount
         );
+        permitTransfer.DOMAIN_SEPARATOR();
     }
 
     function test_RevertsOnInsufficientPermitValue() public {
@@ -316,15 +317,21 @@ contract PermitTransferTest is Test {
 
     function signTransferData(PermitTransfer.TransferData memory transferData, uint256 nonce, uint256 signer)
         internal
-        pure
+        view
         returns (bytes memory)
     {
         bytes32 digest = keccak256(
-            abi.encode(
-                keccak256("Transfer(address token,address to,uint256 nonce)"),
-                transferData.token,
-                transferData.to,
-                nonce
+            abi.encodePacked(
+                hex"1901",
+                permitTransfer.DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        keccak256("Transfer(address token,address to,uint256 nonce)"),
+                        transferData.token,
+                        transferData.to,
+                        nonce
+                    )
+                )
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signer, digest);
