@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 import {Script, console} from "forge-std/Script.sol";
 import {PermitTransfer} from "../src/PermitTransfer.sol";
 
-contract PermitTransferScript is Script {
+contract PermitTransferDeploymentScript is Script {
     PermitTransfer public permitTransfer;
 
     function setUp() public {}
